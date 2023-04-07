@@ -30,7 +30,7 @@ services:
         "-path",
         "/migrations",
         "-database",
-        "postgres://studydso_user:studydso_pass@localhost:5445/studydso_db?sslmode=disable"
+        "postgres://studydso_user:studydso_pass@studydso_db:5445/studydso_db?sslmode=disable"
       ]
     command: ["up"]
     depends_on:

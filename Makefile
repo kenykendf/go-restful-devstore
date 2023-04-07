@@ -31,6 +31,6 @@ environment:
 	docker compose -f ${DOCKER_COMPOSE_FILE} up -d
 	
 docker-restart: ## Run docker container
-	docker compose up -d
+	docker compose down && docker compose up -d
 docker-logs: ## Logging docker container
 	docker logs -f studydso_db

@@ -6,6 +6,7 @@ type Config struct {
 	DBDriver     string `mapstructure:"DB_Driver"`
 	DBConnection string `mapstructure:"DB_Connection"`
 	ServerPort   string `mapstructure:"Server_Port"`
+	LogLevel     string `mapstructure:"LOG_LEVEL"`
 }
 
 func LoadConfig(fileConfigPath string) (Config, error) {

@@ -34,3 +34,8 @@ docker-restart: ## Run docker container
 	docker compose down && docker compose up -d
 docker-logs: ## Logging docker container
 	docker logs -f studydso_db
+run-app: ## run main.go
+	go run cmd/main.go
+
+lint: ## Running golangci-lint
+	docker compose -f ${DOCKER_COMPOSE_FILE} --profile tools run --rm lint golangci-lint run -v

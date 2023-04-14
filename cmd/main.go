@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +11,9 @@ import (
 	"github.com/kenykendf/go-restful/internal/app/service"
 	"github.com/kenykendf/go-restful/internal/pkg/config"
 	"github.com/kenykendf/go-restful/internal/pkg/db"
+	"github.com/kenykendf/go-restful/internal/pkg/middleware"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var cfg config.Config
@@ -22,24 +24,42 @@ func init() {
 	// read configuration,
 	configLoad, err := config.LoadConfig(".")
 	if err != nil {
-		log.Panic("cannot load app config")
+		fmt.Println("cannot load app config")
+		return
 	}
 	cfg = configLoad
 
 	// connect database
 	db, err := db.ConnectDB(cfg.DBDriver, cfg.DBConnection)
 	if err != nil {
-		log.Panic("db unavailable")
+		fmt.Println("db unavailable")
+		return
 	}
 	DBConn = db
+
+	// setup logrus
+	logLevel, err := log.ParseLevel("debug")
+	if err != nil {
+		logLevel = log.InfoLevel
+	}
+
+	log.SetLevel(logLevel)                 // apply log level
+	log.SetFormatter(&log.JSONFormatter{}) // define format using json
+
 }
 
 func main() {
+	// using default gin logger
+	// r := gin.Default()
 
-	fmt.Println("PRINT CFG DBConnection ", cfg.DBConnection)
-	fmt.Println("PRINT CFG DBDriver ", cfg.DBDriver)
-	fmt.Println("PRINT CFG ServerPort ", cfg.ServerPort)
-	r := gin.Default()
+	// using default gin logger
+	r := gin.New()
+
+	// enable middleware
+	r.Use(
+		middleware.LoggingMiddleware(),
+		middleware.RecoveryMiddleware(),
+	)
 
 	r.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"message": "ping"})

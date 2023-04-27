@@ -1,0 +1,24 @@
+schemas:
+  ResponseListCategory:
+    type: object
+    properties:
+      status:
+        type: string
+        example:  success
+      message:
+        type: string
+        example: success get list category
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example:  1
+            name:
+              type: string
+              example:  "my category"
+            description:
+              type: string
+              example:  "description for my category"

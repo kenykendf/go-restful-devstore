@@ -9,3 +9,8 @@ type ICategoryService interface {
 	UpdateCategory(id string, req schema.CreateCategoryReq) error
 	DeleteCategory(id string) error
 }
+
+type IProductService interface {
+	Create(req schema.CreateProductReq) error
+	BrowseAll() ([]schema.GetProductResp, error)
+}

@@ -32,17 +32,29 @@ services:
     volumes: 
       - ./db/migrations:/migrations
     entrypoint:
-      [
-        "migrate",
-        "-path",
-        "/migrations",
-        "-database",
-        "postgres://studydso_user:studydso_pass@studydso_db:5445/studydso_db?sslmode=disable"
-      ]
+    [
+      "migrate",
+      "-path",
+      "/migrations",
+      "-database",
+      "postgres://studydso_user:studydso_pass@studydso_db:5445/studydso_db?sslmode=disable"
+    ]
     command: ["up"]
     depends_on:
       studydso_db:
         condition: service_healthy
         restart: false
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8004:8080"
+    volumes:
+      - ./docs:/docs
+    environment:
+      - SWAGGER_JSON=/docs/api.yml
+      - BASE_URL=/swagger
+    # env_file:
+    #   - app.env
 volumes:
   postgres_data:

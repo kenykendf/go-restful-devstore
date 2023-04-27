@@ -76,6 +76,17 @@ func main() {
 	r.PUT("/categories/:id", categoryController.UpdateCategory)
 	r.DELETE("/categories/:id", categoryController.DeleteCategory)
 
+	productRepo := repository.NewProductRepo(DBConn)
+	productService := service.NewProductService(productRepo)
+	productController := controllers.NewProductController(productService)
+
+	// products
+	r.POST("/products", productController.Create)
+	r.GET("/products", productController.BrowseProduct)
+	// r.GET("/products/:id", productController)
+	// r.PUT("/products/:id", productController)
+	// r.DELETE("/products/:id", productController)
+
 	appPort := fmt.Sprintf(":%s", cfg.ServerPort)
 	r.Run(appPort)
 }

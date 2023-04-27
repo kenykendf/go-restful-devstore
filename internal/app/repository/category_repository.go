@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/kenykendf/go-restful/internal/app/model"
+	"github.com/sirupsen/logrus"
 )
 
 type CategoryRepo struct {
@@ -87,7 +88,8 @@ func (cr *CategoryRepo) Update(id string, category model.Category) error {
 	)
 	_, err := cr.DB.Exec(sqlStatement, id, category.Name, category.Description)
 	if err != nil {
-		log.Print("Update Failed , ", err)
+		logrus.Error(fmt.Errorf("error updating category : %w", err))
+
 		return err
 	}
 

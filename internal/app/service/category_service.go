@@ -7,6 +7,8 @@ import (
 	"github.com/kenykendf/go-restful/internal/app/model"
 	"github.com/kenykendf/go-restful/internal/app/repository"
 	"github.com/kenykendf/go-restful/internal/app/schema"
+	"github.com/kenykendf/go-restful/internal/pkg/reason"
+	"github.com/sirupsen/logrus"
 )
 
 type CategoryService struct {
@@ -53,7 +55,6 @@ func (cs *CategoryService) DetailCategory(id string) (schema.GetCategoryResp, er
 
 	category, err := cs.repo.Detail(id)
 	if err != nil {
-		fmt.Println("PRINT ERR = ", err)
 		return schema.GetCategoryResp{}, errors.New("server error, unable to fetch category detail")
 	}
 
@@ -67,18 +68,36 @@ func (cs *CategoryService) DetailCategory(id string) (schema.GetCategoryResp, er
 func (cs *CategoryService) UpdateCategory(id string, req schema.CreateCategoryReq) error {
 	var updateData model.Category
 
-	updateData.Name = req.Name
-	updateData.Description = req.Description
-
-	err := cs.repo.Update(id, updateData)
+	category, err := cs.repo.Detail(id)
 	if err != nil {
-		return errors.New("cannot create category")
+		return errors.New(reason.CategoryNotFound)
+	}
+
+	updateData.Name = req.Name
+	if req.Name == "" {
+		updateData.Name = category.Name
+	}
+	updateData.Description = req.Description
+	if req.Description == "" {
+		updateData.Description = category.Description
+	}
+
+	err = cs.repo.Update(id, updateData)
+	if err != nil {
+		logrus.Error(fmt.Errorf("error updating category : %w", err))
+		return errors.New("cannot update category")
 	}
 	return nil
 }
 
 func (cs *CategoryService) DeleteCategory(id string) error {
-	err := cs.repo.Delete(id)
+
+	_, err := cs.repo.Detail(id)
+	if err != nil {
+		return errors.New(reason.CategoryNotFound)
+	}
+
+	err = cs.repo.Delete(id)
 	if err != nil {
 		return errors.New("cannot delete category")
 	}

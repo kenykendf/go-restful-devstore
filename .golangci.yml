@@ -1,0 +1,12 @@
+run:
+  skip-dirs:
+    - "docs"
+    - "db"
+  go: "1.20"
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - gosec
+    - gosimple
+    - unused

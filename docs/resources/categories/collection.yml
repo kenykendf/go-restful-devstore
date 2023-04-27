@@ -1,0 +1,12 @@
+get:
+  description: List category data.
+  summary: To get list category data
+  tags:
+    - Category
+  responses:
+    200:
+      decription: Success get list categories
+      content:
+        application/json:
+          schema:
+            $ref: "entity.yml#/schemas/ResponseListCategory"

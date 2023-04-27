@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kenykendf/go-restful/internal/app/schema"
 	"github.com/kenykendf/go-restful/internal/app/service"
+	"github.com/sirupsen/logrus"
 )
 
 type CategoryController struct {
@@ -68,6 +70,7 @@ func (cc *CategoryController) UpdateCategory(ctx *gin.Context) {
 
 	err = cc.service.UpdateCategory(categoryID, req)
 	if err != nil {
+		logrus.Error(fmt.Errorf("error updating category : %w", err))
 		ctx.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}

@@ -11,3 +11,8 @@ type ICategoryRepo interface {
 	Update(id string, category model.Category) error
 	Delete(id string) error
 }
+
+type IProductRepo interface {
+	Create(product model.Product) error
+	Browse() ([]model.Product, error)
+}

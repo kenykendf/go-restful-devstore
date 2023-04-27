@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Devstore API
+  description: Documentation for devstore api
+  version: 1.0.0
+servers:
+  - url: http://0.0.0.0:8083
+    description: URL development
+  - url: http://staging.devstore.com
+    description: URL staging
+
+tags:
+  - name: Category
+    description: CRUD data category.
+
+paths:
+  /categories:
+    $ref: "./resources/categories/collection.yml"
+  # /categories/{id}:
+  #   $ref: "./resources/categories/member.yml"

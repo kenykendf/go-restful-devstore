@@ -10,3 +10,8 @@ type CreateCategoryReq struct {
 	Name        string `validate:"required" json:"name"`
 	Description string `validate:"required" json:"description"`
 }
+
+type UpdateCategoryReq struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}

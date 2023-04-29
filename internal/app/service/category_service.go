@@ -19,7 +19,7 @@ func NewCategoryService(repo repository.ICategoryRepo) *CategoryService {
 	return &CategoryService{repo: repo}
 }
 
-func (cs *CategoryService) Create(req schema.CreateCategoryReq) error {
+func (cs *CategoryService) Create(req *schema.CreateCategoryReq) error {
 	var insertData model.Category
 
 	insertData.Name = req.Name
@@ -27,7 +27,7 @@ func (cs *CategoryService) Create(req schema.CreateCategoryReq) error {
 
 	err := cs.repo.Create(insertData)
 	if err != nil {
-		return errors.New("cannot create category")
+		return errors.New(reason.CategoryCannotCreate)
 	}
 	return nil
 }
@@ -65,7 +65,7 @@ func (cs *CategoryService) DetailCategory(id string) (schema.GetCategoryResp, er
 	return resp, err
 }
 
-func (cs *CategoryService) UpdateCategory(id string, req schema.CreateCategoryReq) error {
+func (cs *CategoryService) UpdateCategory(id string, req schema.UpdateCategoryReq) error {
 	var updateData model.Category
 
 	category, err := cs.repo.Detail(id)
@@ -85,7 +85,7 @@ func (cs *CategoryService) UpdateCategory(id string, req schema.CreateCategoryRe
 	err = cs.repo.Update(id, updateData)
 	if err != nil {
 		logrus.Error(fmt.Errorf("error updating category : %w", err))
-		return errors.New("cannot update category")
+		return errors.New(reason.CategoryCannotUpdate)
 	}
 	return nil
 }
@@ -99,7 +99,7 @@ func (cs *CategoryService) DeleteCategory(id string) error {
 
 	err = cs.repo.Delete(id)
 	if err != nil {
-		return errors.New("cannot delete category")
+		return errors.New(reason.CategoryCannotDelete)
 	}
 	return nil
 }

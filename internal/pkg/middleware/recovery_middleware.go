@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kenykendf/go-restful/internal/pkg/reason"
 )
 
 func RecoveryMiddleware() gin.HandlerFunc {
@@ -11,7 +12,7 @@ func RecoveryMiddleware() gin.HandlerFunc {
 		defer func() {
 			err := recover()
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+				ctx.JSON(http.StatusInternalServerError, gin.H{"message": reason.InternalServerError})
 			}
 		}()
 		ctx.Next()

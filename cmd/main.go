@@ -48,6 +48,7 @@ func init() {
 
 }
 
+// nolint
 func main() {
 	// using default gin logger
 	// r := gin.Default()

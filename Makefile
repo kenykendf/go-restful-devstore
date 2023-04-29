@@ -41,7 +41,7 @@ lint: ## Running golangci-lint
 	docker compose -f ${DOCKER_COMPOSE_FILE} --profile tools run --rm lint golangci-lint run -v
 
 test: ## Exec Test Case
-	go test ./... -counte=1 -coverprofile=coverage.out
+	go test ./... -count=1 -coverprofile=coverage.out
 
 test-cover: ## Golang Testing Coverage
 	go tool cover -html=coverage.out

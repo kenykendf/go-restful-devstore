@@ -16,5 +16,5 @@ tags:
 paths:
   /categories:
     $ref: "./resources/categories/collection.yml"
-  # /categories/{id}:
-  #   $ref: "./resources/categories/member.yml"
+  /categories/{id}:
+    $ref: "./resources/categories/member.yml"

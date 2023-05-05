@@ -32,13 +32,13 @@ services:
     volumes: 
       - ./db/migrations:/migrations
     entrypoint:
-    [
-      "migrate",
-      "-path",
-      "/migrations",
-      "-database",
-      "postgres://studydso_user:studydso_pass@studydso_db:5445/studydso_db?sslmode=disable"
-    ]
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://studydso_user:studydso_pass@studydso_db:5445/studydso_db?sslmode=disable"
+      ]
     command: ["up"]
     depends_on:
       studydso_db:

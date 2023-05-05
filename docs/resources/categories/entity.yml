@@ -22,3 +22,37 @@ schemas:
             description:
               type: string
               example:  "description for my category"
+
+  ResponseDetail200:
+    type: object
+    properties:
+      status:
+        type: string
+        example:  success
+      message:
+        type: string
+        example: success get detail category
+      data:
+        type: object  
+        properties:
+          id:
+            type: integer
+            example:  1
+          name:
+            type: string
+            example:  "my category"
+          description:
+            type: string
+            example:  "description for my category"
+
+  ResponseDetail404:
+      type: object
+      properties:
+        status:
+          type: string
+          example:  success
+        message:
+          type: string
+          example: data not found
+        data:
+            type: object

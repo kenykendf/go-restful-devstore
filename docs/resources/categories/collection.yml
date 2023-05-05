@@ -10,3 +10,16 @@ get:
         application/json:
           schema:
             $ref: "entity.yml#/schemas/ResponseListCategory"
+
+post:
+  description: create category data.
+  summary: To create list category data
+  tags:
+    - Category
+  responses:
+    200:
+      decription: Success get list categories
+      content:
+        application/json:
+          schema:
+            $ref: "entity.yml#/schemas/ResponseListCategory"

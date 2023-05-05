@@ -1,0 +1,21 @@
+get:
+  description: Detail category data.
+  summary: To get detail category data
+  tags:
+    - Category
+  responses:
+    200:
+      decription: Success get detail category
+      content:
+        application/json:
+          schema:
+            $ref: "entity.yml#/schemas/ResponseDetail200"
+    404:
+      decription: Data Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "entity.yml#/schemas/ResponseDetail404"
+            
+put:
+delete:

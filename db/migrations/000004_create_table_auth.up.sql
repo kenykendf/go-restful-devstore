@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS auth (
+    id BIGSERIAL PRIMARY KEY NOT NULL,
+    token VARCHAR NOT NULL,
+    auth_type VARCHAR NOT NULL,
+    user_id BIGINT NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);

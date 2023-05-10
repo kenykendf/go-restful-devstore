@@ -21,7 +21,7 @@ migrate-down-all: ## Rollback migrations, all migrations
 	docker compose -f ${DOCKER_COMPOSE_FILE} --profile tools run --rm migrate down 1
 
 migrate-create: ## Create a DB migration files e.g `make migrate-create name=migration-name`
-	docker compose -f ${DOCKER_COMPOSE_FILE} --profile tools run --rm migrate create -ext sql -dir /migrations $(name)
+	docker compose -f ${DOCKER_COMPOSE_FILE} --profile tools run --rm migrate create -ext sql -dir /migrations -seq $(name)
 
 shell-db: ## Enter to database console
 	docker compose -f ${DOCKER_COMPOSE_FILE} exec db psql -U postgres -d postgres

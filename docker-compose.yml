@@ -5,7 +5,7 @@ services:
     image: postgres:15.2
     restart: always
     ports:
-      - 5445:5432
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -37,7 +37,7 @@ services:
         "-path",
         "/migrations",
         "-database",
-        "postgres://studydso_user:studydso_pass@studydso_db:5445/studydso_db?sslmode=disable"
+        "postgres://studydso_user:studydso_pass@studydso_db:5432/studydso_db?sslmode=disable"
       ]
     command: ["up"]
     depends_on:

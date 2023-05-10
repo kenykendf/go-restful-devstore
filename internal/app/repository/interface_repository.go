@@ -16,3 +16,8 @@ type IProductRepo interface {
 	Create(product model.Product) error
 	Browse() ([]model.Product, error)
 }
+
+type IUserService interface {
+	Create(req model.User) error
+	GetByEmail(email string) (model.User, error)
+}

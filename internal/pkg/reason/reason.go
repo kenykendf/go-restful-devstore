@@ -22,3 +22,11 @@ var (
 	ProductCannotDelete    = "cannot delete product"
 	ProductCannotGetDetail = "cannot get detail"
 )
+
+var (
+	UserAlreadyExist = "user already exist"
+	RegisterFailed   = "cannot register user."
+	FailedLogin      = "login failed, make sure credentials are correct"
+	Unauthorized     = "user unauthorized"
+	InvalidAccess    = "unable to access this resource."
+)

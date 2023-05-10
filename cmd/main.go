@@ -13,11 +13,15 @@ import (
 	"github.com/kenykendf/go-restful/internal/pkg/db"
 	"github.com/kenykendf/go-restful/internal/pkg/middleware"
 
+	"github.com/casbin/casbin/v2"
 	log "github.com/sirupsen/logrus"
 )
 
-var cfg config.Config
-var DBConn *sqlx.DB
+var (
+	cfg      config.Config
+	DBConn   *sqlx.DB
+	Enforcer *casbin.Enforcer
+)
 
 func init() {
 
@@ -32,7 +36,7 @@ func init() {
 	// connect database
 	db, err := db.ConnectDB(cfg.DBDriver, cfg.DBConnection)
 	if err != nil {
-		fmt.Println("db unavailable")
+		log.Panic(err)
 		return
 	}
 	DBConn = db
@@ -46,19 +50,25 @@ func init() {
 	log.SetLevel(logLevel)                 // apply log level
 	log.SetFormatter(&log.JSONFormatter{}) // define format using json
 
+	// setup casbin
+	e, err := casbin.NewEnforcer("config/model.conf", "config/policy.csv")
+	if err != nil {
+		log.Panic("cannot init casbin")
+	}
+	Enforcer = e
 }
 
 // nolint
 func main() {
 	// using default gin logger
 	// r := gin.Default()
-
 	// using default gin logger
 	r := gin.New()
 
 	// enable middleware
 	r.Use(
 		middleware.LoggingMiddleware(),
+		// handle panic return
 		middleware.RecoveryMiddleware(),
 	)
 
@@ -67,9 +77,30 @@ func main() {
 	})
 
 	categoryRepo := repository.NewCategoryRepo(DBConn)
-	categoryService := service.NewCategoryService(categoryRepo)
-	categoryController := controllers.NewCategoryController(categoryService)
+	productRepo := repository.NewProductRepo(DBConn)
+	userRepo := repository.NewUserRepository(DBConn)
+	authRepository := repository.NewAuthRepo(DBConn)
 
+	tokenMaker := service.NewGenerateToken(
+		cfg.AccessTokenKey,
+		cfg.RefreshTokenKey,
+		cfg.AccessTokenDuration,
+		cfg.RefreshTokenDuration,
+	)
+
+	categoryService := service.NewCategoryService(categoryRepo)
+	productService := service.NewProductService(productRepo)
+	userService := service.NewUserService(userRepo)
+	sessionService := service.NewSessionService(userRepo, authRepository, tokenMaker)
+
+	categoryController := controllers.NewCategoryController(categoryService)
+	productController := controllers.NewProductController(productService)
+	userController := controllers.NewUserController(userService)
+	sessionController := controllers.NewSessionController(sessionService)
+
+	r.POST("/auth/login", sessionController.Login)
+
+	r.Use(middleware.AuthMiddleware(tokenMaker))
 	// categories
 	r.POST("/categories", categoryController.CreateCategory)
 	r.GET("/categories", categoryController.BrowseCategory)
@@ -77,16 +108,19 @@ func main() {
 	r.PUT("/categories/:id", categoryController.UpdateCategory)
 	r.DELETE("/categories/:id", categoryController.DeleteCategory)
 
-	productRepo := repository.NewProductRepo(DBConn)
-	productService := service.NewProductService(productRepo)
-	productController := controllers.NewProductController(productService)
-
 	// products
 	r.POST("/products", productController.Create)
 	r.GET("/products", productController.BrowseProduct)
 	// r.GET("/products/:id", productController)
 	// r.PUT("/products/:id", productController)
 	// r.DELETE("/products/:id", productController)
+
+	// users
+	r.POST("/user", userController.Create)
+	// r.GET("/users", userController.Create)
+	// r.GET("/users/:id", userController.Create)
+	// r.PUT("/users/:id", userController.Create)
+	// r.DELETE("/users/:id", userController.Create)
 
 	appPort := fmt.Sprintf(":%s", cfg.ServerPort)
 	r.Run(appPort)

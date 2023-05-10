@@ -1,6 +1,8 @@
 package service
 
-import "github.com/kenykendf/go-restful/internal/app/schema"
+import (
+	"github.com/kenykendf/go-restful/internal/app/schema"
+)
 
 type ICategoryService interface {
 	BrowseAll() ([]schema.GetCategoryResp, error)
@@ -13,4 +15,8 @@ type ICategoryService interface {
 type IProductService interface {
 	Create(req schema.CreateProductReq) error
 	BrowseAll() ([]schema.GetProductResp, error)
+}
+
+type IUserService interface {
+	Create(req *schema.CreateUser) error
 }

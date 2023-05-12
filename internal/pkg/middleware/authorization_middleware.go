@@ -17,7 +17,7 @@ func AuthorizationMiddleware(
 	enforcer *casbin.Enforcer,
 ) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		sub := ctx.GetString("user_id")
+		// sub := ctx.GetString("user_id")
 		// enforcer
 		ok, err := enforcer.Enforce(sub, obj, act)
 		// check err

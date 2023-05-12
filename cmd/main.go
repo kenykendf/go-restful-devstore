@@ -103,7 +103,7 @@ func main() {
 	r.Use(middleware.AuthMiddleware(tokenMaker))
 	// categories
 	r.POST("/categories", categoryController.CreateCategory)
-	r.GET("/categories", categoryController.BrowseCategory)
+	r.GET("/categories", middleware.AuthorizationMiddleware("alice", "data1", "read", Enforcer), categoryController.BrowseCategory)
 	r.GET("/categories/:id", categoryController.DetailCategory)
 	r.PUT("/categories/:id", categoryController.UpdateCategory)
 	r.DELETE("/categories/:id", categoryController.DeleteCategory)

@@ -88,8 +88,14 @@ func main() {
 		cfg.RefreshTokenDuration,
 	)
 
+	uploaderService := service.NewUploadService(
+		cfg.CloudinaryName,
+		cfg.CloudinaryAPIKey,
+		cfg.CloudinaryAPISecret,
+		cfg.CloudinaryDir,
+	)
 	categoryService := service.NewCategoryService(categoryRepo)
-	productService := service.NewProductService(productRepo)
+	productService := service.NewProductService(productRepo, categoryRepo, uploaderService)
 	userService := service.NewUserService(userRepo)
 	sessionService := service.NewSessionService(userRepo, authRepository, tokenMaker)
 

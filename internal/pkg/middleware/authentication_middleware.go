@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -47,11 +46,6 @@ func getToken(ctx *gin.Context) string {
 	bearer := ctx.Request.Header.Get("Authorization")
 	fields := strings.Fields(bearer)
 
-	fmt.Println("===bearer===")
-	fmt.Println(bearer)
-
-	fmt.Println("===fields===")
-	fmt.Println(fields)
 	if len(fields) != 0 && fields[0] == "Bearer" {
 		accessToken = fields[1]
 	}

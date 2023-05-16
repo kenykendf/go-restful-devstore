@@ -1,10 +1,11 @@
+// nolint
 package service
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 type GenerateToken struct {

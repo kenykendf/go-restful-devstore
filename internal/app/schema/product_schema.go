@@ -1,5 +1,7 @@
 package schema
 
+import "mime/multipart"
+
 type GetProductResp struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
@@ -12,11 +14,12 @@ type GetProductResp struct {
 }
 
 type CreateProductReq struct {
-	Name        string
-	Description string
-	Currency    string
-	Price       int
-	TotalStock  int
-	IsActive    bool
-	CategoryID  int
+	Name        string                `form:"name"`
+	Description string                `form:"description"`
+	Currency    string                `form:"currency"`
+	Price       int                   `form:"price"`
+	TotalStock  int                   `form:"total_stock"`
+	IsActive    bool                  `form:"is_active"`
+	CategoryID  int                   `form:"category_id"`
+	Image       *multipart.FileHeader `form:"image"`
 }

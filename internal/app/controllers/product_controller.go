@@ -19,7 +19,7 @@ func NewProductController(service service.IProductService) *ProductController {
 func (pc *ProductController) Create(ctx *gin.Context) {
 	var req schema.CreateProductReq
 
-	err := ctx.ShouldBindJSON(&req)
+	err := ctx.ShouldBind(&req)
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, err.Error())
 		return

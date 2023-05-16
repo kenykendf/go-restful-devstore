@@ -50,7 +50,7 @@ func (cr *CategoryRepo) Browse() ([]model.Category, error) {
 
 	for rows.Next() {
 		var category model.Category
-		rows.StructScan(&category)
+		_ = rows.StructScan(&category)
 		categories = append(categories, category)
 	}
 

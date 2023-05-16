@@ -1,4 +1,4 @@
-// nolint{errcheck}
+// nolint
 package service
 
 import (

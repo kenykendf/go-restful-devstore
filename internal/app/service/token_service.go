@@ -71,7 +71,7 @@ func (gt *GenerateToken) VerifyAccessToken(tokenString string) (string, error) {
 	return sub, err
 }
 
-func (gt *GenerateToken) VerifyRefreshToken(tokenString string, tokenKey string) (string, error) {
+func (gt *GenerateToken) VerifyRefreshToken(tokenString string) (string, error) {
 	sub, err := gt.verify(tokenString, gt.RefreshTokenKey)
 	return sub, err
 }

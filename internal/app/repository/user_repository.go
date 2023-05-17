@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -15,6 +16,54 @@ type UserRepository struct {
 
 func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{DB: db}
+}
+
+// get list user
+func (ur *UserRepository) Browse() ([]model.User, error) {
+	var (
+		users        []model.User
+		sqlStatement = `
+			SELECT id, username, email
+			FROM users
+		`
+	)
+
+	rows, err := ur.DB.Queryx(sqlStatement)
+	if err != nil {
+		log.Error(fmt.Errorf("error UserRepository - Browse : %w", err))
+		return users, err
+	}
+
+	for rows.Next() {
+		var user model.User
+		err := rows.StructScan(&user)
+		if err != nil {
+			log.Error(fmt.Errorf("error UserRepository - Browse : %w", err))
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+// get detail user
+func (ur *UserRepository) GetByEmailAndUsername(email string, username string) (model.User, error) {
+	var (
+		sqlStatement = `
+			SELECT id, username, email
+			FROM users
+			WHERE email = $1 AND username = $2
+			LIMIT 1
+		`
+		user model.User
+	)
+	err := ur.DB.QueryRowx(sqlStatement, email, username).StructScan(&user)
+	if err != nil {
+		log.Error(fmt.Errorf("error UserRepository - GetByEmailAndUsername : %w", err))
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (ur *UserRepository) Create(user model.User) error {
@@ -35,6 +84,25 @@ func (ur *UserRepository) Create(user model.User) error {
 	return nil
 }
 
+func (ur *UserRepository) GetByID(userID int) (model.User, error) {
+	var (
+		sqlStatement = `
+			SELECT id, email, hashed_password, username
+			FROM users
+			WHERE id = $1
+			LIMIT 1
+		`
+		user model.User
+	)
+	err := ur.DB.QueryRowx(sqlStatement, userID).StructScan(&user)
+	if err != nil {
+		log.Error(fmt.Errorf("error UserRepository - GetByEmail : %w", err))
+		return user, err
+	}
+
+	return user, nil
+}
+
 func (ur *UserRepository) GetByEmail(email string) (model.User, error) {
 	var (
 		sqlStatement = `
@@ -53,4 +121,53 @@ func (ur *UserRepository) GetByEmail(email string) (model.User, error) {
 	}
 
 	return user, nil
+}
+
+// update user by id
+func (ur *UserRepository) Update(user model.User) error {
+	var (
+		sqlStatement = `
+			UPDATE users
+			SET updated_at = NOW(),
+				username = $2,
+				email = $3
+			WHERE id = $1
+		`
+	)
+
+	result, err := ur.DB.Exec(sqlStatement, user.ID, user.Username, user.Email)
+	if err != nil {
+		log.Error(fmt.Errorf("error UserRepository - UpdateByID : %w", err))
+		return err
+	}
+
+	totalAffected, _ := result.RowsAffected()
+	if totalAffected <= 0 {
+		return errors.New("no record affected")
+	}
+
+	return nil
+}
+
+// delete user by id
+func (ur *UserRepository) DeleteByID(id string) error {
+	var (
+		sqlStatement = `
+			DELETE FROM users
+			WHERE id = $1
+		`
+	)
+
+	result, err := ur.DB.Exec(sqlStatement, id)
+	if err != nil {
+		log.Error(fmt.Errorf("error UserRepository - DeleteByID : %w", err))
+		return err
+	}
+
+	totalAffected, _ := result.RowsAffected()
+	if totalAffected <= 0 {
+		return errors.New("no record affected")
+	}
+
+	return nil
 }

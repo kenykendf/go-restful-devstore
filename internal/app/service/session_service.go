@@ -15,10 +15,13 @@ import (
 
 type UserRepo interface {
 	GetByEmail(email string) (model.User, error)
+	GetByID(userID int) (model.User, error)
 }
 
 type AuthRepo interface {
 	Create(auth model.Auth) error
+	DeleteAllByUserID(userID int) error
+	Find(userID int, refreshToken string) (model.Auth, error)
 }
 
 type TokenGenerator interface {
@@ -93,12 +96,33 @@ func (ss *SessionService) Login(req *schema.LoginReq) (schema.LoginResp, error) 
 	return resp, nil
 }
 
-func (ss *SessionService) Logout() {
-
+func (ss *SessionService) Logout(UserID int) error {
+	err := ss.authRepo.DeleteAllByUserID(UserID)
+	if err != nil {
+		log.Error(fmt.Errorf("refresh token saving : %w", err))
+		return errors.New(reason.FailedLogout)
+	}
+	return nil
 }
 
-func (ss *SessionService) Refresh() {
+func (ss *SessionService) Refresh(req *schema.RefreshTokenReq) (schema.RefreshTokenResp, error) {
+	var resp schema.RefreshTokenResp
 
+	existingUser, _ := ss.userRepo.GetByID(req.UserID)
+	if existingUser.ID <= 0 {
+		return resp, errors.New(reason.FailedRefreshToken)
+	}
+
+	auth, err := ss.authRepo.Find(existingUser.ID, req.RefreshToken)
+	if err != nil || auth.ID < 0 {
+		log.Error(fmt.Errorf("error SessionService - refresh : %w", err))
+		return resp, errors.New(reason.FailedRefreshToken)
+	}
+
+	accessToken, _, _ := ss.tokenMaker.GenerateAccessToken(existingUser.ID)
+
+	resp.AccessToken = accessToken
+	return resp, nil
 }
 
 func (ss *SessionService) verifyPassword(hashPass string, plainPass string) bool {

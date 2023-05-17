@@ -5,3 +5,8 @@ type Category struct {
 	Name        string
 	Description string
 }
+
+type BrowseCategory struct {
+	Page     int
+	PageSize int
+}

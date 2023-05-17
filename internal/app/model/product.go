@@ -11,3 +11,8 @@ type Product struct {
 	CategoryID  int     `db:"category_id"`
 	ImageURL    *string `db:"image_url"`
 }
+
+type BrowseProduct struct {
+	Page     int
+	PageSize int
+}

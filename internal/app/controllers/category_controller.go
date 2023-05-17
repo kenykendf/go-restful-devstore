@@ -6,18 +6,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kenykendf/go-restful/internal/app/schema"
-	"github.com/kenykendf/go-restful/internal/app/service"
 	"github.com/kenykendf/go-restful/internal/pkg/handler"
 	"github.com/kenykendf/go-restful/internal/pkg/reason"
 	"github.com/kenykendf/go-restful/internal/pkg/validator"
 	"github.com/sirupsen/logrus"
 )
 
-type CategoryController struct {
-	service service.ICategoryService
+type CategoryService interface {
+	Create(req *schema.CreateCategoryReq) error
+	BrowseAll(req *schema.BrowseCategoryReq) ([]schema.GetCategoryResp, error)
+	DetailCategory(id string) (schema.GetCategoryResp, error)
+	UpdateCategory(id string, req *schema.UpdateCategoryReq) error
+	DeleteCategory(id string) error
 }
 
-func NewCategoryController(service service.ICategoryService) *CategoryController {
+type CategoryController struct {
+	service CategoryService
+}
+
+func NewCategoryController(service CategoryService) *CategoryController {
 	return &CategoryController{service: service}
 }
 
@@ -37,7 +44,11 @@ func (cc *CategoryController) CreateCategory(ctx *gin.Context) {
 }
 
 func (cc *CategoryController) BrowseCategory(ctx *gin.Context) {
-	resp, err := cc.service.BrowseAll()
+	req := &schema.BrowseCategoryReq{}
+	req.Page = ctx.GetInt("page")
+	req.PageSize = ctx.GetInt("page_size")
+
+	resp, err := cc.service.BrowseAll(req)
 	if err != nil {
 		handler.ResponseError(ctx, http.StatusUnprocessableEntity, err.Error())
 		return
@@ -59,12 +70,9 @@ func (cc *CategoryController) DetailCategory(ctx *gin.Context) {
 }
 
 func (cc *CategoryController) UpdateCategory(ctx *gin.Context) {
-	categoryID := ctx.Param("id")
-	var req schema.UpdateCategoryReq
-
-	err := ctx.ShouldBindJSON(&req)
-	if err != nil {
-		handler.ResponseError(ctx, http.StatusUnprocessableEntity, err.Error())
+	id, _ := ctx.Params.Get("id")
+	req := &schema.UpdateCategoryReq{}
+	if handler.BindAndCheck(ctx, req) {
 		return
 	}
 
@@ -74,7 +82,7 @@ func (cc *CategoryController) UpdateCategory(ctx *gin.Context) {
 		return
 	}
 
-	err = cc.service.UpdateCategory(categoryID, req)
+	err := cc.service.UpdateCategory(id, req)
 	if err != nil {
 		logrus.Error(fmt.Errorf("error updating category : %w", err))
 		handler.ResponseError(ctx, http.StatusUnprocessableEntity, err.Error())

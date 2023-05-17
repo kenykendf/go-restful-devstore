@@ -5,15 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kenykendf/go-restful/internal/app/schema"
-	"github.com/kenykendf/go-restful/internal/app/service"
 	"github.com/kenykendf/go-restful/internal/pkg/handler"
 )
 
-type UserController struct {
-	service service.IUserService
+type User interface {
+	Create(req *schema.CreateUser) error
 }
 
-func NewUserController(service service.IUserService) *UserController {
+type UserController struct {
+	service User
+}
+
+func NewUserController(service User) *UserController {
 	return &UserController{service: service}
 }
 

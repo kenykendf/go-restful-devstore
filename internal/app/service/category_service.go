@@ -5,17 +5,16 @@ import (
 	"fmt"
 
 	"github.com/kenykendf/go-restful/internal/app/model"
-	"github.com/kenykendf/go-restful/internal/app/repository"
 	"github.com/kenykendf/go-restful/internal/app/schema"
 	"github.com/kenykendf/go-restful/internal/pkg/reason"
 	"github.com/sirupsen/logrus"
 )
 
 type CategoryService struct {
-	repo repository.ICategoryRepo
+	repo CategoryRepository
 }
 
-func NewCategoryService(repo repository.ICategoryRepo) *CategoryService {
+func NewCategoryService(repo CategoryRepository) *CategoryService {
 	return &CategoryService{repo: repo}
 }
 
@@ -32,12 +31,16 @@ func (cs *CategoryService) Create(req *schema.CreateCategoryReq) error {
 	return nil
 }
 
-func (cs *CategoryService) BrowseAll() ([]schema.GetCategoryResp, error) {
+func (cs *CategoryService) BrowseAll(req *schema.BrowseCategoryReq) ([]schema.GetCategoryResp, error) {
 	var resp []schema.GetCategoryResp
 
-	categories, err := cs.repo.Browse()
+	dbSearch := model.BrowseCategory{}
+	dbSearch.Page = req.Page
+	dbSearch.PageSize = req.PageSize
+
+	categories, err := cs.repo.Browse(dbSearch)
 	if err != nil {
-		return nil, errors.New("server error, unable to fetch categories")
+		return nil, errors.New(reason.CategoryCannotBrowse)
 	}
 
 	for _, value := range categories {
@@ -47,6 +50,7 @@ func (cs *CategoryService) BrowseAll() ([]schema.GetCategoryResp, error) {
 		respData.Description = value.Description
 		resp = append(resp, respData)
 	}
+
 	return resp, nil
 }
 
@@ -65,7 +69,7 @@ func (cs *CategoryService) DetailCategory(id string) (schema.GetCategoryResp, er
 	return resp, err
 }
 
-func (cs *CategoryService) UpdateCategory(id string, req schema.UpdateCategoryReq) error {
+func (cs *CategoryService) UpdateCategory(id string, req *schema.UpdateCategoryReq) error {
 	var updateData model.Category
 
 	category, err := cs.repo.Detail(id)
@@ -82,7 +86,7 @@ func (cs *CategoryService) UpdateCategory(id string, req schema.UpdateCategoryRe
 		updateData.Description = category.Description
 	}
 
-	err = cs.repo.Update(id, updateData)
+	err = cs.repo.Update(updateData)
 	if err != nil {
 		logrus.Error(fmt.Errorf("error updating category : %w", err))
 		return errors.New(reason.CategoryCannotUpdate)

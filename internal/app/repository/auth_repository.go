@@ -16,6 +16,25 @@ func NewAuthRepo(db *sqlx.DB) *AuthRepo {
 	return &AuthRepo{DB: db}
 }
 
+func (ar *AuthRepo) Find(userID int, refreshToken string) (model.Auth, error) {
+	var (
+		sqlStatement = `
+			SELECT id, token, auth_type, user_id, expired_at
+			FROM auth
+			WHERE user_id = $1 AND token = $2
+		`
+		auth model.Auth
+	)
+
+	err := ar.DB.QueryRowx(sqlStatement, userID, refreshToken).StructScan(&auth)
+	if err != nil {
+		log.Error(fmt.Errorf("error AuthRepository - Find : %w", err))
+		return auth, err
+	}
+
+	return auth, nil
+}
+
 func (ar *AuthRepo) Create(auth model.Auth) error {
 	var (
 		sqlStatement = `
@@ -29,5 +48,22 @@ func (ar *AuthRepo) Create(auth model.Auth) error {
 		log.Error(fmt.Errorf("error AuthRepo - Create : %w", err))
 		return err
 	}
+	return nil
+}
+
+func (ar *AuthRepo) DeleteAllByUserID(userID int) error {
+	var (
+		sqlStatement = `
+			DELETE FROM auth
+			WHERE user_id = $1
+		`
+	)
+
+	_, err := ar.DB.Exec(sqlStatement, userID)
+	if err != nil {
+		log.Error(fmt.Errorf("error AuthRepository - DeleteAllByUserID : %w", err))
+		return err
+	}
+
 	return nil
 }

@@ -2,16 +2,10 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"github.com/kenykendf/go-restful/internal/app/controllers"
-	"github.com/kenykendf/go-restful/internal/app/repository"
-	"github.com/kenykendf/go-restful/internal/app/service"
 	"github.com/kenykendf/go-restful/internal/pkg/config"
 	"github.com/kenykendf/go-restful/internal/pkg/db"
-	"github.com/kenykendf/go-restful/internal/pkg/middleware"
 
 	"github.com/casbin/casbin/v2"
 	log "github.com/sirupsen/logrus"
@@ -60,74 +54,16 @@ func init() {
 
 // nolint
 func main() {
-	// using default gin logger
-	// r := gin.Default()
-	// using default gin logger
-	r := gin.New()
+	// init server
+	server, err := NewServer(cfg, DBConn)
+	if err != nil {
+		log.Panic("cannot init server")
+	}
 
-	// enable middleware
-	r.Use(
-		middleware.LoggingMiddleware(),
-		// handle panic return
-		middleware.RecoveryMiddleware(),
-	)
-
-	r.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"message": "ping"})
-	})
-
-	categoryRepo := repository.NewCategoryRepo(DBConn)
-	productRepo := repository.NewProductRepo(DBConn)
-	userRepo := repository.NewUserRepository(DBConn)
-	authRepository := repository.NewAuthRepo(DBConn)
-
-	tokenMaker := service.NewGenerateToken(
-		cfg.AccessTokenKey,
-		cfg.RefreshTokenKey,
-		cfg.AccessTokenDuration,
-		cfg.RefreshTokenDuration,
-	)
-
-	uploaderService := service.NewUploadService(
-		cfg.CloudinaryName,
-		cfg.CloudinaryAPIKey,
-		cfg.CloudinaryAPISecret,
-		cfg.CloudinaryDir,
-	)
-	categoryService := service.NewCategoryService(categoryRepo)
-	productService := service.NewProductService(productRepo, categoryRepo, uploaderService)
-	userService := service.NewUserService(userRepo)
-	sessionService := service.NewSessionService(userRepo, authRepository, tokenMaker)
-
-	categoryController := controllers.NewCategoryController(categoryService)
-	productController := controllers.NewProductController(productService)
-	userController := controllers.NewUserController(userService)
-	sessionController := controllers.NewSessionController(sessionService)
-
-	r.POST("/auth/login", sessionController.Login)
-
-	r.Use(middleware.AuthMiddleware(tokenMaker))
-	// categories
-	r.POST("/categories", categoryController.CreateCategory)
-	r.GET("/categories", middleware.AuthorizationMiddleware("alice", "data1", "read", Enforcer), categoryController.BrowseCategory)
-	r.GET("/categories/:id", categoryController.DetailCategory)
-	r.PUT("/categories/:id", categoryController.UpdateCategory)
-	r.DELETE("/categories/:id", categoryController.DeleteCategory)
-
-	// products
-	r.POST("/products", productController.Create)
-	r.GET("/products", productController.BrowseProduct)
-	// r.GET("/products/:id", productController)
-	// r.PUT("/products/:id", productController)
-	// r.DELETE("/products/:id", productController)
-
-	// users
-	r.POST("/user", userController.Create)
-	// r.GET("/users", userController.Create)
-	// r.GET("/users/:id", userController.Create)
-	// r.PUT("/users/:id", userController.Create)
-	// r.DELETE("/users/:id", userController.Create)
-
+	// start server
 	appPort := fmt.Sprintf(":%s", cfg.ServerPort)
-	r.Run(appPort)
+	err = server.Start(appPort)
+	if err != nil {
+		log.Panic(fmt.Errorf("error cannot start app : %w", err))
+	}
 }

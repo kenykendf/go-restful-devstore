@@ -24,9 +24,11 @@ var (
 )
 
 var (
-	UserAlreadyExist = "user already exist"
-	RegisterFailed   = "cannot register user."
-	FailedLogin      = "login failed, make sure credentials are correct"
-	Unauthorized     = "user unauthorized"
-	InvalidAccess    = "unable to access this resource."
+	UserAlreadyExist   = "user already exist"
+	RegisterFailed     = "cannot register user."
+	FailedLogin        = "login failed, make sure credentials are correct"
+	Unauthorized       = "user unauthorized"
+	InvalidAccess      = "unable to access this resource."
+	FailedLogout       = "failed logout."
+	FailedRefreshToken = "failed to refresh token, please check your token." //nolint
 )

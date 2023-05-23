@@ -15,7 +15,7 @@ import (
 
 type UserRepo interface {
 	GetByEmail(email string) (model.User, error)
-	GetByID(userID int) (model.User, error)
+	Detail(userID int) (model.User, error)
 }
 
 type AuthRepo interface {
@@ -108,7 +108,7 @@ func (ss *SessionService) Logout(UserID int) error {
 func (ss *SessionService) Refresh(req *schema.RefreshTokenReq) (schema.RefreshTokenResp, error) {
 	var resp schema.RefreshTokenResp
 
-	existingUser, _ := ss.userRepo.GetByID(req.UserID)
+	existingUser, _ := ss.userRepo.Detail(req.UserID)
 	if existingUser.ID <= 0 {
 		return resp, errors.New(reason.FailedRefreshToken)
 	}

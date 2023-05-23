@@ -2,11 +2,10 @@ package repository
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/kenykendf/go-restful/internal/app/model"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type CategoryRepo struct {
@@ -32,25 +31,31 @@ func (cr *CategoryRepo) Create(category model.Category) error {
 	return nil
 }
 
-func (cr *CategoryRepo) Browse() ([]model.Category, error) {
+func (cr *CategoryRepo) Browse(search model.BrowseCategory) ([]model.Category, error) {
 	var (
+		limit        = search.PageSize
+		offset       = limit * (search.Page - 1)
 		categories   []model.Category
 		sqlStatement = `
 			SELECT id, name, description
 			FROM categories
-			WHERE deleted_at IS NULL
+			LIMIT $1
+			OFFSET $2
 		`
 	)
 
-	rows, err := cr.DB.Queryx(sqlStatement)
+	rows, err := cr.DB.Queryx(sqlStatement, limit, offset)
 	if err != nil {
-		log.Print(fmt.Errorf("error exec query statement : %w", err))
+		log.Error(fmt.Errorf("error CategoryRepository - Browse : %w", err))
 		return categories, err
 	}
 
 	for rows.Next() {
 		var category model.Category
-		_ = rows.StructScan(&category)
+		err := rows.StructScan(&category)
+		if err != nil {
+			log.Error(fmt.Errorf("error CategoryRepository - Browse : %w", err))
+		}
 		categories = append(categories, category)
 	}
 
@@ -71,14 +76,12 @@ func (cr *CategoryRepo) Detail(id string) (model.Category, error) {
 
 	err := rows.Scan(&category.ID, &category.Name, &category.Description)
 	if err != nil {
-		fmt.Println("ERR REPO ", err)
-		log.Println("Unable to fetch category detail")
 		return model.Category{}, err
 	}
 	return category, nil
 }
 
-func (cr *CategoryRepo) Update(id string, category model.Category) error {
+func (cr *CategoryRepo) Update(category model.Category) error {
 	var (
 		sqlStatement = `
 			UPDATE categories
@@ -86,10 +89,9 @@ func (cr *CategoryRepo) Update(id string, category model.Category) error {
 			WHERE id = $1
 			`
 	)
-	_, err := cr.DB.Exec(sqlStatement, id, category.Name, category.Description)
+	_, err := cr.DB.Exec(sqlStatement, category.ID, category.Name, category.Description)
 	if err != nil {
-		logrus.Error(fmt.Errorf("error updating category : %w", err))
-
+		log.Error(fmt.Errorf("error updating category : %w", err))
 		return err
 	}
 
@@ -106,7 +108,6 @@ func (cr *CategoryRepo) Delete(id string) error {
 	)
 	_, err := cr.DB.Exec(sqlStatement, id)
 	if err != nil {
-		log.Print("Delete Failed , ", err)
 		return err
 	}
 

@@ -84,7 +84,7 @@ func (ur *UserRepository) Create(user model.User) error {
 	return nil
 }
 
-func (ur *UserRepository) GetByID(userID int) (model.User, error) {
+func (ur *UserRepository) Detail(userID int) (model.User, error) {
 	var (
 		sqlStatement = `
 			SELECT id, email, hashed_password, username
